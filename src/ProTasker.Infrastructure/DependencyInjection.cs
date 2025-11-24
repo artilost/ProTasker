@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProTasker.Infrastructure.Persistence;
+using ProTasker.Domain.Interfaces;
 
 namespace ProTasker.Infrastructure;
 
@@ -20,6 +21,12 @@ public static class DependencyInjection
                 // MigrationsAssembly: Migration dosyalarının nerede tutulacağını belirtir.
                 // Infrastructure projesinde tutulmasını istiyoruz.
                 builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+
+        // Repository ve UnitOfWork servislerini ekliyoruz.
+        // Scoped: Her HTTP isteği (Request) için yeni bir tane oluşturulur.
+        // Neden Scoped? Çünkü DbContext de Scoped'dır. Bir istek boyunca aynı DbContext'i kullanmak isteriz.
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
